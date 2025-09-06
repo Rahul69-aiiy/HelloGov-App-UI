@@ -15,7 +15,7 @@ const StatCard = ({ icon, number, label, color, iconSet = 'MaterialCommunityIcon
 
 const styles = StyleSheet.create({
   statCard: {
-    width: 120,
+    width: 150,
     borderRadius: 12,
     padding: 15,
     alignItems: 'center',

@@ -44,9 +44,9 @@ const HomeScreen = () => {
         <Text style={styles.sectionTitle}>This month in Jharkhand</Text>
         <View style={styles.statsRow}>
           <ScrollView horizontal={true} showsHorizontalScrollIndicator={false} contentContainerStyle={styles.statsRow}>
-            <StatCard icon="lightbulb-on" number="3540" label="Streetlights fixed" color="#E0F2E9" />
-            <StatCard icon="road-variant" number="2345" label="Potholes fixed" color="#FCE8E6" />
-            <StatCard icon="trash-can-outline" number="1742" label="Garbage spots cleared" color="#E8EAED" />
+            <StatCard icon="lightbulb-on" number="3540" label="Streetlights fixed" color="#c6e3edff" />
+            <StatCard icon="road-variant" number="2345" label="Potholes fixed" color="#E8EAED" />
+            <StatCard icon="trash-can-outline" number="1742" label="Garbage spots cleared" color="#FCE8E6" />
           </ScrollView>
         </View>
 
