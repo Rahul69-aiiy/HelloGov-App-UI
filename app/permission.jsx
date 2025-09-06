@@ -39,18 +39,27 @@ const LocationPermissionScreen = () => {
             resizeMode="contain"
           />
 
+          <View style={styles.seperator} />
+
           {/* Permission Buttons */}
           <TouchableOpacity style={styles.button} onPress={handlePermissionResponse}>
             <Text style={styles.buttonText}>Allow Once</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={[styles.button, styles.allowWhileUsingButton]} onPress={handlePermissionResponse}>
-            <Text style={[styles.buttonText, styles.allowWhileUsingButton]}>Allow While Using the App</Text>
-          </TouchableOpacity>
+          <View style={styles.seperator} />
 
           <TouchableOpacity style={styles.button} onPress={handlePermissionResponse}>
-            <Text style={[styles.buttonText, styles.dontAllowButtonText]}>Don't Allow</Text>
+            <Text style={styles.buttonText}>Allow While Using the App</Text>
           </TouchableOpacity>
+
+          <View style={styles.seperator} />
+
+          <TouchableOpacity style={styles.button} onPress={handlePermissionResponse}>
+            <Text style={styles.buttonText}>Don't Allow</Text>
+          </TouchableOpacity>
+
+          <View style={styles.seperator} />
+
         </View>
       </SafeAreaView>
     </>
@@ -92,25 +101,20 @@ const styles = StyleSheet.create({
   button: {
     width: '90%',
     paddingVertical: 15,
-    borderRadius: 10,
-    borderWidth: StyleSheet.hairlineWidth, 
-    borderColor: '#CCC',
-    marginBottom: 15,
+    marginBottom: 1,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  allowWhileUsingButton: {
-    backgroundColor: '#007AFF',
-    borderColor: '#007AFF',
-    color: '#fff'
   },
   buttonText: {
     fontSize: 17,
     color: '#007AFF', 
     fontWeight: '500',
   },
-  dontAllowButtonText: {
-    color: '#007AFF',
+  seperator: {
+    height: 1,
+    width: "100%",
+    backgroundColor: "#ccc",
+    marginVertical: -5,
   },
 });
 
