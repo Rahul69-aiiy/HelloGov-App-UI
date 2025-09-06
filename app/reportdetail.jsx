@@ -48,7 +48,7 @@ const ReportDetailScreen = () => {
           headerTitleStyle: styles.headerTitle,
           headerLeft: () => (
             // This button takes the user back to the main tab interface
-            <TouchableOpacity onPress={() => router.replace('/(tabs)')} style={{ paddingLeft: 10 }}>
+            <TouchableOpacity onPress={() => router.push('/(tabs)')} style={{ paddingLeft: 10 }}>
               <MaterialCommunityIcons name="arrow-left" size={24} color="#FFF" />
             </TouchableOpacity>
           ),

@@ -11,11 +11,12 @@ import MenuItem from '../../../components/MenuItem';
 import { router, useRouter } from 'expo-router';
 
 const AccountScreen = ({ navigation }) => {
+  const router = useRouter();
   // Placeholder functions
   const handleLogout = () => {
     Alert.alert('Logout', 'Are you sure you want to logout?', [
       { text: 'Cancel', style: 'cancel' },
-      { text: 'OK', onPress: () => console.log('User logged out') }, // Implement actual logout logic
+      { text: 'OK', onPress: () => router.push('../(auth)/login') }, 
     ]);
   };
 
@@ -23,8 +24,6 @@ const AccountScreen = ({ navigation }) => {
     console.log('Navigate to Edit Profile screen');
     // navigation.navigate('EditProfile');
   };
-
-  const router = useRouter();
 
   return (
     <SafeAreaView style={styles.safeArea}>
