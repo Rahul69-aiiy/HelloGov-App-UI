@@ -56,12 +56,6 @@ const AddReportScreen = () => {
             title: 'Add Report',
             headerTitleStyle: styles.headerTitle,
             headerTitleAlign: 'center',
-            headerRight: () => (
-              <TouchableOpacity onPress={() => router.back()} style={styles.closeButton}>
-                <MaterialCommunityIcons name="close" size={24} color="#333" />
-              </TouchableOpacity>
-            ),
-            headerLeft: () => null, // Hide the default back button if you use a custom close
           }}
         />
 
