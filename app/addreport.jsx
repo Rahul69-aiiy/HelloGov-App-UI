@@ -8,23 +8,71 @@ import {
   TouchableOpacity,
   ScrollView,
   Platform,
-  KeyboardAvoidingView, 
+  KeyboardAvoidingView,
+  Image,
+  Alert,
+  ActivityIndicator,
+  Modal,
+  Pressable,
 } from 'react-native';
 import { Stack, useRouter } from 'expo-router';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import Checkbox from 'expo-checkbox';
+import * as ImagePicker from 'expo-image-picker';
+import { Video } from 'expo-av';
+import { useMedia } from './MediaContext';
 
 const AddReportScreen = () => {
   const router = useRouter();
+  const { addImages } = useMedia();
   const [description, setDescription] = useState('');
   const [isAnonymous, setAnonymous] = useState(false);
   const [location, setLocation] = useState('Charta, Jharkhand'); // Placeholder for automatic location
+  const [media, setMedia] = useState(null); // { uri, mediaType, fileName }
+  const [uploading, setUploading] = useState(false);
+  const [uploadResult, setUploadResult] = useState(null);
+  const [showPicker, setShowPicker] = useState(false);
 
-  const handleSubmit = () => {
-    // Implement submission logic here
-    console.log({ description, isAnonymous, location });
-    // After submission, you might want to redirect
-    router.replace('reportdetail')
+  // Optional: set an upload URL here or via env/config. If empty, upload will be simulated.
+  const UPLOAD_URL = ''; // e.g. 'https://your-api.example.com/upload'
+
+  const handleSubmit = async () => {
+    // Validate mandatory media
+    if (!media) {
+      Alert.alert('Missing media', 'Please attach a photo or video before submitting.');
+      return;
+    }
+
+    console.log({ description, isAnonymous, location, media });
+
+    try {
+      const res = await uploadMedia();
+      if (res && res.ok) {
+        Alert.alert('Upload successful', 'Your report is uploaded.');
+        // Add to shared media context so reportdetail can display it reliably
+        try {
+          addImages([media.uri]);
+        } catch (e) {
+          console.warn('addImages failed', e);
+        }
+
+        // Also navigate and pass params for backward compatibility
+        router.push({
+          pathname: '/reportdetail',
+          params: {
+            description,
+            mediaUri: media.uri,
+            mediaType: media.mediaType,
+            images: JSON.stringify([media.uri]),
+          },
+        });
+      } else {
+        Alert.alert('Upload failed', (res && res.error) ? String(res.error) : 'Please try again.');
+      }
+    } catch (e) {
+      console.log('submit error', e);
+      Alert.alert('Error', 'An unexpected error occurred.');
+    }
   };
 
   const handleCancel = () => {
@@ -37,8 +85,123 @@ const AddReportScreen = () => {
   };
 
   const handleAddPhotoPress = () => {
-    console.log('Add photo functionality');
-    // Implement image picker/camera logic
+    // Open custom modal picker
+    setShowPicker(true);
+  };
+
+  const requestPermissions = async () => {
+    try {
+      const camera = await ImagePicker.requestCameraPermissionsAsync();
+      const mediaLib = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      return (
+        (camera?.status === 'granted' || camera?.granted) &&
+        (mediaLib?.status === 'granted' || mediaLib?.granted)
+      );
+    } catch (e) {
+      console.log('permission error', e);
+      return false;
+    }
+  };
+
+  const handleAssetResult = (result) => {
+    const cancelled = result?.cancelled ?? result?.canceled;
+    const asset = result?.assets ? result.assets[0] : result;
+    if (cancelled || !asset) return;
+
+    const uri = asset.uri || asset?.uri;
+    let mediaType = asset.type || asset.mediaType;
+    const fileName = asset.fileName || (uri ? uri.split('/').pop() : null);
+    if (!mediaType && uri) {
+      mediaType = uri.match(/\.(mp4|mov|m4v|avi)$/i) ? 'video' : 'image';
+    }
+
+    setMedia({ uri, mediaType, fileName });
+  };
+
+  const takePhoto = async () => {
+  setShowPicker(false);
+  const ok = await requestPermissions();
+    if (!ok) {
+      Alert.alert('Permissions required', 'Please allow camera and media permissions in settings');
+      return;
+    }
+
+    try {
+      const result = await ImagePicker.launchCameraAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.All,
+        allowsEditing: false,
+        quality: 0.8,
+      });
+      handleAssetResult(result);
+    } catch (e) {
+      console.log('camera error', e);
+    }
+  };
+
+  const pickFromLibrary = async () => {
+  setShowPicker(false);
+  const ok = await requestPermissions();
+    if (!ok) {
+      Alert.alert('Permissions required', 'Please allow media library permissions in settings');
+      return;
+    }
+
+    try {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.All,
+        allowsEditing: false,
+        quality: 0.8,
+      });
+      handleAssetResult(result);
+    } catch (e) {
+      console.log('library error', e);
+    }
+  };
+
+  const removeMedia = () => setMedia(null);
+
+  const uploadMedia = async () => {
+    if (!media || !media.uri) return null;
+    setUploading(true);
+    setUploadResult(null);
+
+    try {
+      // If no UPLOAD_URL provided, simulate an upload delay and return a fake response
+      if (!UPLOAD_URL) {
+        await new Promise((res) => setTimeout(res, 1200));
+        const fake = { ok: true, url: media.uri };
+        setUploadResult(fake);
+        return fake;
+      }
+
+      // Convert local file URI to blob
+      const response = await fetch(media.uri);
+      const blob = await response.blob();
+      const fd = new FormData();
+      fd.append('file', {
+        uri: media.uri,
+        name: media.fileName || 'upload',
+        type: blob.type || (media.mediaType?.startsWith('video') ? 'video/mp4' : 'image/jpeg'),
+      });
+
+      const uploadRes = await fetch(UPLOAD_URL, {
+        method: 'POST',
+        body: fd,
+        headers: {
+          'Accept': 'application/json',
+        },
+      });
+
+      const json = await uploadRes.json().catch(() => ({ ok: uploadRes.ok }));
+      setUploadResult(json);
+      return json;
+    } catch (e) {
+      console.log('upload error', e);
+      setUploadResult({ ok: false, error: String(e) });
+      return { ok: false, error: String(e) };
+    } finally {
+      setUploading(false);
+    }
   };
 
   return (
@@ -82,8 +245,27 @@ const AddReportScreen = () => {
           <Text style={styles.inputLabel}>
             <Text style={styles.mandatoryText}>*</Text> Photo<Text style={styles.optionalText}>(mandatory)</Text>
           </Text>
-          <TouchableOpacity style={styles.photoUploadBox} onPress={handleAddPhotoPress}>
-            <MaterialCommunityIcons name="plus" size={28} color="#555" />
+          <TouchableOpacity style={styles.photoUploadBox} onPress={handleAddPhotoPress} activeOpacity={0.9}>
+            {media ? (
+              <View style={styles.mediaWrapper}>
+                {media.mediaType && media.mediaType.startsWith('video') ? (
+                  <Video
+                    source={{ uri: media.uri }}
+                    style={styles.mediaPreview}
+                    useNativeControls
+                    resizeMode="cover"
+                    isLooping={false}
+                  />
+                ) : (
+                  <Image source={{ uri: media.uri }} style={styles.mediaPreview} />
+                )}
+                <TouchableOpacity style={styles.removeButton} onPress={removeMedia}>
+                  <MaterialCommunityIcons name="close-circle" size={28} color="#D93025" />
+                </TouchableOpacity>
+              </View>
+            ) : (
+              <MaterialCommunityIcons name="plus" size={28} color="#555" />
+            )}
           </TouchableOpacity>
 
           {/* Location (Automatic) */}
@@ -115,10 +297,42 @@ const AddReportScreen = () => {
             <TouchableOpacity style={styles.cancelButton} onPress={handleCancel}>
               <Text style={styles.cancelButtonText}>Cancel</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
-              <Text style={styles.submitButtonText}>Submit</Text>
+            <TouchableOpacity
+              style={[styles.submitButton, uploading ? { opacity: 0.7 } : null]}
+              onPress={handleSubmit}
+              disabled={uploading}
+            >
+              {uploading ? (
+                <ActivityIndicator color="#fff" />
+              ) : (
+                <Text style={styles.submitButtonText}>Submit</Text>
+              )}
             </TouchableOpacity>
           </View>
+          {/* Custom picker modal */}
+          <Modal
+            visible={showPicker}
+            transparent
+            animationType="slide"
+            onRequestClose={() => setShowPicker(false)}
+          >
+            <Pressable style={styles.modalOverlay} onPress={() => setShowPicker(false)}>
+              <View style={styles.pickerContainer}>
+                <Text style={styles.pickerTitle}>Attach media</Text>
+                <TouchableOpacity style={styles.pickerOption} onPress={() => takePhoto()}>
+                  <MaterialCommunityIcons name="camera" size={22} color="#fff" />
+                  <Text style={styles.pickerOptionText}>Camera</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.pickerOption} onPress={() => pickFromLibrary()}>
+                  <MaterialCommunityIcons name="image" size={22} color="#fff" />
+                  <Text style={styles.pickerOptionText}>Gallery</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={[styles.pickerOption, styles.pickerCancel]} onPress={() => setShowPicker(false)}>
+                  <Text style={styles.pickerOptionText}>Cancel</Text>
+                </TouchableOpacity>
+              </View>
+            </Pressable>
+          </Modal>
         </ScrollView>
       </SafeAreaView>
     </KeyboardAvoidingView>
@@ -254,6 +468,61 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 18,
     fontWeight: 'bold',
+  },
+  mediaWrapper: {
+    width: '100%',
+    height: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  mediaPreview: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    width: '100%',
+    height: '100%',
+    borderRadius: 10,
+  },
+  removeButton: {
+    position: 'absolute',
+    top: 6,
+    right: 6,
+    zIndex: 10,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.4)',
+    justifyContent: 'flex-end',
+  },
+  pickerContainer: {
+    backgroundColor: '#000',
+    padding: 16,
+    borderTopLeftRadius: 12,
+    borderTopRightRadius: 12,
+  },
+  pickerTitle: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
+    marginBottom: 12,
+  },
+  pickerOption: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 8,
+    borderRadius: 8,
+  },
+  pickerOptionText: {
+    color: '#fff',
+    marginLeft: 12,
+    fontSize: 16,
+  },
+  pickerCancel: {
+    marginTop: 8,
+    justifyContent: 'center',
   },
 });
 

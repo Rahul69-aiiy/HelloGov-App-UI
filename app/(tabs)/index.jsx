@@ -78,7 +78,7 @@ const HomeScreen = () => {
         <View style={styles.mapContainer}>
           {/* In a real app, you would use a component like react-native-maps here */}
           <Image
-            source={{ uri: 'https://i.imgur.com/A44Vnaa.png' }} // Using a placeholder image for the map
+            source={ require('../../assets/images/map.png')} // Using a placeholder image for the map
             style={styles.mapImage}
             resizeMode="cover"
           />

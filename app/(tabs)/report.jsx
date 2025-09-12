@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import {
   SafeAreaView,
-  View,
-  Text,
-  StyleSheet,
   ScrollView,
+  StyleSheet,
+  Text,
   TouchableOpacity,
+  View,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -13,17 +13,17 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 // --- Mock Data ---
 // In a real app, this data would come from an API.
 const allReportsData = [
-  { id: '1', type: 'Pothole', location: 'Main Street', date: '13 Aug 2025', status: 'Resolved' },
-  { id: '2', type: 'Streetlight Out', location: 'Park Ave', date: '11 Aug 2025', status: 'Resolved' },
-  { id: '3', type: 'Garbage Dump', location: 'Elm Road', date: '9 Aug 2025', status: 'Acknowledged' },
-  { id: '4', type: 'Illegal Parking', location: 'Downtown', date: '5 Aug 2025', status: 'Invalid Report' },
-  { id: '5', type: 'Water Leak', location: 'Bridge Lane', date: '23 July 2025', status: 'Invalid Report' },
-  { id: '6', type: 'Graffiti', location: 'Market Square', date: '15 July 2025', status: 'Resolved' },
-  { id: '7', type: 'Road Damage', location: 'North Blvd', date: '10 July 2025', status: 'Acknowledged' },
-  { id: '8', type: 'Broken Bench', location: 'City Park', date: '2 July 2025', status: 'Resolved' },
-  { id: '9', type: 'Noise Complaint', location: 'Residential Area', date: '28 June 2025', status: 'Resolved' },
-  { id: '10', type: 'Public Safety Issue', location: 'Central Station', date: '20 June 2025', status: 'Acknowledged' },
-  { id: '11', type: 'Damaged Sidewalk', location: 'School Zone', date: '15 June 2025', status: 'Resolved' },
+  { id: '1', type: 'Pothole', location: 'Ranchi Main Road', date: '13 Aug 2025', status: 'Resolved' },
+  { id: '2', type: 'Streetlight Out', location: 'Hatia Railway Colony, Ranchi', date: '11 Aug 2025', status: 'Resolved' },
+  { id: '3', type: 'Garbage Dump', location: 'Sakchi Market, Jamshedpur', date: '9 Aug 2025', status: 'Acknowledged' },
+  { id: '4', type: 'Illegal Parking', location: 'Bistupur, Jamshedpur', date: '5 Aug 2025', status: 'Invalid Report' },
+  { id: '5', type: 'Water Leak', location: 'Hazaribagh Road, Ranchi', date: '23 July 2025', status: 'Invalid Report' },
+  { id: '6', type: 'Graffiti', location: 'Morabadi Ground, Ranchi', date: '15 July 2025', status: 'Resolved' },
+  { id: '7', type: 'Road Damage', location: 'Dhanbad Station Road', date: '10 July 2025', status: 'Acknowledged' },
+  { id: '8', type: 'Broken Bench', location: 'Jubilee Park, Jamshedpur', date: '2 July 2025', status: 'Resolved' },
+  { id: '9', type: 'Noise Complaint', location: 'Hindpiri, Ranchi', date: '28 June 2025', status: 'Resolved' },
+  { id: '10', type: 'Public Safety Issue', location: 'Birsa Chowk, Ranchi', date: '20 June 2025', status: 'Acknowledged' },
+  { id: '11', type: 'Damaged Sidewalk', location: 'Golmuri, Jamshedpur', date: '15 June 2025', status: 'Resolved' },
 ];
 
 const ITEMS_PER_PAGE = 5; // Number of items to load at once

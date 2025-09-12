@@ -134,7 +134,7 @@ const termsContent = [
   },
   {
     type: 'paragraph',
-    text: 'These terms are governed by the laws of India. Any disputes shall be subject to the jurisdiction of the courts located in New Delhi, India.',
+    text: 'These terms are governed by the laws of India. Any disputes shall be subject to the jurisdiction of the courts located in Ranchi, Jharkhand, India.',
   },
   {
     type: 'heading',

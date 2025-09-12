@@ -27,7 +27,7 @@ const NearbyScreen = ({ navigation }) => {
     <SafeAreaView style={styles.safeArea}>
       {/* The ImageBackground acts as our dummy map */}
       <ImageBackground
-        source={{ uri: DUMMY_MAP_IMAGE_URL }}
+        source={ require('../../assets/images/map.png')}
         style={styles.mapBackground}
         resizeMode="cover"
       >

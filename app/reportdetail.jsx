@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
+import { useMedia } from './MediaContext';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
 const ReportDetailScreen = () => {
@@ -16,9 +17,9 @@ const ReportDetailScreen = () => {
 
   // Extract data from params, providing default values for the UI
   const reportType = params.reportType || 'General Issue';
-  const location = params.location || '123 Parkview Terrace, Sydney NSW 2000';
-  const description = params.description || 'Description value. Sed posuere consectetur est at lobortis. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus. Integer posuere erat a ante venenatis dapibus posuere velit aliquet.';
-  const dateSubmitted = params.dateSubmitted || '3 Jun 2024, 8:04 pm';
+  const location = params.location || 'Jamshedpur, Jharkhand';
+  const description = params.description || 'There is a pothole in the middle of the main road causing inconvenience to commuters. Multiple vehicles have suffered tire and suspension damage because of this pothole. Immediate repair is needed to prevent further incidents. Due to the pothole, water accumulates during rains, making it hard for pedestrians to cross and for vehicles to judge the road surface.';
+  const dateSubmitted = params.dateSubmitted || '1 Sept 2025, 8:04 pm';
   const status = params.status || 'Status Ref Sm';
   const statusColor = '#D93025'; // Red color from screenshot
 
@@ -31,6 +32,29 @@ const ReportDetailScreen = () => {
       console.error("Failed to parse images from params", e);
     }
   }
+
+  // Fallback: if no images array but a single mediaUri was passed, use it
+  if ((!images || images.length === 0) && params.mediaUri) {
+    images = [params.mediaUri];
+  }
+
+  // Use shared MediaContext images as last-resort fallback (e.g. coming from AddReport)
+  const mediaCtx = (() => {
+    try {
+      return useMedia();
+    } catch (e) {
+      return null;
+    }
+  })();
+
+  if ((!images || images.length === 0) && mediaCtx && mediaCtx.images && mediaCtx.images.length > 0) {
+    images = mediaCtx.images;
+  }
+
+  // Debug: log params to help troubleshooting when images don't show
+  // (Remove or guard this in production)
+  console.log('ReportDetail params:', params);
+  console.log('Resolved images:', images);
 
   const handleEdit = () => {
     console.log('Edit button pressed for report:', params.reportId);
@@ -71,14 +95,11 @@ const ReportDetailScreen = () => {
           </View>
           <View style={styles.mapContainer}>
             <Image
-              source={{ uri: 'https://i.imgur.com/gC5sI4g.png' }} // Dummy map image
+              source={ require('../assets/images/map.png')} // Dummy map image
               style={styles.map}
               resizeMode="cover"
             />
-            <View style={styles.codeWidgetOverlay}>
-              <MaterialCommunityIcons name="code-tags" size={30} color="#666" />
-              <Text style={styles.codeWidgetText}>Code widget</Text>
-            </View>
+            
           </View>
         </View>
 

@@ -34,9 +34,9 @@ const LocationPermissionScreen = () => {
 
           {/* Placeholder for the map image */}
           <Image
-            source={{ uri: 'https://i.imgur.com/7SjL5x3.png' }} // Replace with a real map image or local asset
+            source={require('../assets/images/map.png')} // Replace with a real map image or local asset
             style={styles.mapImage}
-            resizeMode="contain"
+            resizeMode="cover"
           />
 
           <View style={styles.seperator} />

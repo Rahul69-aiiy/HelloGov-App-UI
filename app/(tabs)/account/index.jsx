@@ -16,7 +16,7 @@ const AccountScreen = ({ navigation }) => {
   const handleLogout = () => {
     Alert.alert('Logout', 'Are you sure you want to logout?', [
       { text: 'Cancel', style: 'cancel' },
-      { text: 'OK', onPress: () => router.push('../(auth)/login') }, 
+      { text: 'OK', onPress: () => router.replace('../(auth)/login') }, 
     ]);
   };
 
