@@ -1,15 +1,15 @@
+import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import {
+  Image,
   SafeAreaView,
   ScrollView,
-  View,
-  Text,
   StyleSheet,
-  Image,
+  Text,
   TouchableOpacity,
+  View,
 } from 'react-native';
-import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
-import { useMedia } from './MediaContext';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import { useMedia } from './MediaContext';
 
 const ReportDetailScreen = () => {
   const router = useRouter();
